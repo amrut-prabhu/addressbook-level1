@@ -92,11 +92,6 @@ public class AddressBook {
     private static final String MESSAGE_WELCOME = "Welcome to your Address Book!";
     private static final String MESSAGE_USING_DEFAULT_FILE = "Using default storage file : " + DEFAULT_STORAGE_FILEPATH;
 
-    // These are the strings that define the different components of a person
-    private static final String PERSON_PROPERTY_NAME = "name";
-    private static final String PERSON_PROPERTY_EMAIL = "email";
-    private static final String PERSON_PROPERTY_PHONE = "phone";
-
     // These are the prefix strings to define the data type of a command parameter
     private static final String PERSON_DATA_PREFIX_PHONE = "p/";
     private static final String PERSON_DATA_PREFIX_EMAIL = "e/";
@@ -141,15 +136,10 @@ public class AddressBook {
 
     private static final String DIVIDER = "===================================================";
 
-
-    /* We use a String array to store details of a single person.
-     * The constants given below are the indexes for the different data elements of a person
-     * used by the internal String[] storage format.
-     * For example, a person's name is stored as the 0th element in the array.
-     */
-    private static final int PERSON_DATA_INDEX_NAME = 0;
-    private static final int PERSON_DATA_INDEX_PHONE = 1;
-    private static final int PERSON_DATA_INDEX_EMAIL = 2;
+    // These are the strings that define the different components of a person
+    private static final String PERSON_PROPERTY_NAME = "name";
+    private static final String PERSON_PROPERTY_EMAIL = "email";
+    private static final String PERSON_PROPERTY_PHONE = "phone";
 
     /**
      * The number of data elements for a single person.
@@ -176,8 +166,8 @@ public class AddressBook {
 
     /*
      * NOTE : =============================================================================================
-     * Note that the type of the variable below can also be declared as List<String[]>, as follows:
-     *    private static final List<String[]> ALL_PERSONS = new ArrayList<>()
+     * Note that the type of the variable below can also be declared as List<HashMap<String,String>>, as follows:
+     *    private static final List<HashMap<String,String>> ALL_PERSONS = new ArrayList<>()
      * That is because List is an interface implemented by the ArrayList class.
      * In this code we use ArrayList instead because we wanted to to stay away from advanced concepts
      * such as interface inheritance.
@@ -431,12 +421,7 @@ public class AddressBook {
         }
 
         // add the person as specified
-        final HashMap<String, String> personDetailsToAdd = decodeResult.get();
-        final String[] personToAdd = new String[PERSON_DATA_COUNT];
-        personToAdd[PERSON_DATA_INDEX_NAME] = personDetailsToAdd.get(PERSON_PROPERTY_NAME);
-        personToAdd[PERSON_DATA_INDEX_PHONE] = personDetailsToAdd.get(PERSON_PROPERTY_PHONE);
-        personToAdd[PERSON_DATA_INDEX_EMAIL] = personDetailsToAdd.get(PERSON_PROPERTY_EMAIL);
-
+        final HashMap<String, String> personToAdd = decodeResult.get();
         addPersonToAddressBook(personToAdd);
         return getMessageForSuccessfulAddPerson(personToAdd);
     }
@@ -448,7 +433,7 @@ public class AddressBook {
      * @param addedPerson person who was successfully added
      * @return successful add person feedback message
      */
-    private static String getMessageForSuccessfulAddPerson(String[] addedPerson) {
+    private static String getMessageForSuccessfulAddPerson(HashMap<String,String> addedPerson) {
         return String.format(MESSAGE_ADDED,
                 getNameFromPerson(addedPerson), getPhoneFromPerson(addedPerson), getEmailFromPerson(addedPerson));
     }
@@ -495,15 +480,10 @@ public class AddressBook {
      */
     private static ArrayList<HashMap<String, String>> getPersonsWithNameContainingAnyKeyword(Collection<String> keywords) {
         final ArrayList<HashMap<String, String>> matchedPersons = new ArrayList<>();
-        for (HashMap<String, String> personDetails : getAllPersonsInAddressBook()) {
-            String[] person = new String[3];
-            person[PERSON_DATA_INDEX_NAME] = personDetails.get(PERSON_PROPERTY_NAME);
-            person[PERSON_DATA_INDEX_PHONE] = personDetails.get(PERSON_PROPERTY_PHONE);
-            person[PERSON_DATA_INDEX_EMAIL] = personDetails.get(PERSON_PROPERTY_EMAIL);
-
+        for (HashMap<String, String> person : getAllPersonsInAddressBook()) {
             final Set<String> wordsInName = new HashSet<>(splitByWhitespace(getNameFromPerson(person)));
             if (!Collections.disjoint(wordsInName, keywords)) {
-                matchedPersons.add(personDetails);
+                matchedPersons.add(person);
             }
         }
         return matchedPersons;
@@ -523,7 +503,7 @@ public class AddressBook {
         if (!isDisplayIndexValidForLastPersonListingView(targetVisibleIndex)) {
             return MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
         }
-        final String[] targetInModel = getPersonByLastVisibleIndex(targetVisibleIndex);
+        final HashMap<String,String> targetInModel = getPersonByLastVisibleIndex(targetVisibleIndex);
         return deletePersonFromAddressBook(targetInModel) ? getMessageForSuccessfulDelete(targetInModel) // success
                                                           : MESSAGE_PERSON_NOT_IN_ADDRESSBOOK; // not found
     }
@@ -570,7 +550,7 @@ public class AddressBook {
      * @param deletedPerson successfully deleted
      * @return successful delete person feedback message
      */
-    private static String getMessageForSuccessfulDelete(String[] deletedPerson) {
+    private static String getMessageForSuccessfulDelete(HashMap<String,String> deletedPerson) {
         return String.format(MESSAGE_DELETE_PERSON_SUCCESS, getMessageForFormattedPersonData(deletedPerson));
     }
 
@@ -657,11 +637,7 @@ public class AddressBook {
     private static String getDisplayString(ArrayList<HashMap<String, String>> persons) {
         final StringBuilder messageAccumulator = new StringBuilder();
         for (int i = 0; i < persons.size(); i++) {
-            final HashMap<String, String> personDetails = persons.get(i);
-            String[] person = new String[3];
-            person[PERSON_DATA_INDEX_NAME] = personDetails.get(PERSON_PROPERTY_NAME);
-            person[PERSON_DATA_INDEX_PHONE] = personDetails.get(PERSON_PROPERTY_PHONE);
-            person[PERSON_DATA_INDEX_EMAIL] = personDetails.get(PERSON_PROPERTY_EMAIL);
+            final HashMap<String, String> person = persons.get(i);
 
             final int displayIndex = i + DISPLAYED_INDEX_OFFSET;
             messageAccumulator.append('\t')
@@ -678,7 +654,7 @@ public class AddressBook {
      * @param person to show
      * @return formatted listing message with index
      */
-    private static String getIndexedPersonListElementMessage(int visibleIndex, String[] person) {
+    private static String getIndexedPersonListElementMessage(int visibleIndex, HashMap<String,String> person) {
         return String.format(MESSAGE_DISPLAY_LIST_ELEMENT_INDEX, visibleIndex) + getMessageForFormattedPersonData(person);
     }
 
@@ -688,7 +664,7 @@ public class AddressBook {
      * @param person to show
      * @return formatted message showing internal state
      */
-    private static String getMessageForFormattedPersonData(String[] person) {
+    private static String getMessageForFormattedPersonData(HashMap<String,String> person) {
         return String.format(MESSAGE_DISPLAY_PERSON_DATA,
                 getNameFromPerson(person), getPhoneFromPerson(person), getEmailFromPerson(person));
     }
@@ -709,14 +685,8 @@ public class AddressBook {
      * @param lastVisibleIndex displayed index from last shown person listing
      * @return the actual person object in the last shown person listing
      */
-    private static String[] getPersonByLastVisibleIndex(int lastVisibleIndex) {
-        final HashMap<String, String> personDetails = latestPersonListingView.get(lastVisibleIndex - DISPLAYED_INDEX_OFFSET);
-        String[] person = new String[3];
-        person[PERSON_DATA_INDEX_NAME] = personDetails.get(PERSON_PROPERTY_NAME);
-        person[PERSON_DATA_INDEX_PHONE] = personDetails.get(PERSON_PROPERTY_PHONE);
-        person[PERSON_DATA_INDEX_EMAIL] = personDetails.get(PERSON_PROPERTY_EMAIL);
-
-       return person;
+    private static HashMap<String,String> getPersonByLastVisibleIndex(int lastVisibleIndex) {
+        return latestPersonListingView.get(lastVisibleIndex - DISPLAYED_INDEX_OFFSET);
     }
 
 
@@ -809,12 +779,8 @@ public class AddressBook {
      *
      * @param person to add
      */
-    private static void addPersonToAddressBook(String[] person) {
-        HashMap<String, String> personDetails = new HashMap<>();
-        personDetails.put(PERSON_PROPERTY_NAME, person[PERSON_DATA_INDEX_NAME]);
-        personDetails.put(PERSON_PROPERTY_EMAIL, person[PERSON_DATA_INDEX_EMAIL]);
-        personDetails.put(PERSON_PROPERTY_PHONE, person[PERSON_DATA_INDEX_PHONE]);
-        ALL_PERSONS.add(personDetails);
+    private static void addPersonToAddressBook(HashMap<String,String> person) {
+        ALL_PERSONS.add(person);
         savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
     }
 
@@ -824,13 +790,8 @@ public class AddressBook {
      * @param exactPerson the actual person inside the address book (exactPerson == the person to delete in the full list)
      * @return true if the given person was found and deleted in the model
      */
-    private static boolean deletePersonFromAddressBook(String[] exactPerson) {
-        HashMap<String, String> exactPersonDetails = new HashMap<>();
-        exactPersonDetails.put(PERSON_PROPERTY_NAME, exactPerson[PERSON_DATA_INDEX_NAME]);
-        exactPersonDetails.put(PERSON_PROPERTY_PHONE, exactPerson[PERSON_DATA_INDEX_PHONE]);
-        exactPersonDetails.put(PERSON_PROPERTY_EMAIL, exactPerson[PERSON_DATA_INDEX_EMAIL]);
-
-        final boolean changed = ALL_PERSONS.remove(exactPersonDetails);
+    private static boolean deletePersonFromAddressBook(HashMap<String,String> exactPerson) {
+        final boolean changed = ALL_PERSONS.remove(exactPerson);
         if (changed) {
             savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
         }
@@ -874,8 +835,8 @@ public class AddressBook {
      *
      * @param person whose name you want
      */
-    private static String getNameFromPerson(String[] person) {
-        return person[PERSON_DATA_INDEX_NAME];
+    private static String getNameFromPerson(HashMap<String,String> person) {
+        return person.get(PERSON_PROPERTY_NAME);
     }
 
     /**
@@ -883,8 +844,8 @@ public class AddressBook {
      *
      * @param person whose phone number you want
      */
-    private static String getPhoneFromPerson(String[] person) {
-        return person[PERSON_DATA_INDEX_PHONE];
+    private static String getPhoneFromPerson(HashMap<String,String> person) {
+        return person.get(PERSON_PROPERTY_PHONE);
     }
 
     /**
@@ -892,8 +853,8 @@ public class AddressBook {
      *
      * @param person whose email you want
      */
-    private static String getEmailFromPerson(String[] person) {
-        return person[PERSON_DATA_INDEX_EMAIL];
+    private static String getEmailFromPerson(HashMap<String,String> person) {
+        return person.get(PERSON_PROPERTY_EMAIL);
     }
 
     /**
@@ -918,7 +879,7 @@ public class AddressBook {
      * @param person to be encoded
      * @return encoded string
      */
-    private static String encodePersonToString(String[] person) {
+    private static String encodePersonToString(HashMap<String,String> person) {
         return String.format(PERSON_STRING_REPRESENTATION,
                 getNameFromPerson(person), getPhoneFromPerson(person), getEmailFromPerson(person));
     }
@@ -931,12 +892,7 @@ public class AddressBook {
      */
     private static ArrayList<String> encodePersonsToStrings(ArrayList<HashMap<String, String>> persons) {
         final ArrayList<String> encoded = new ArrayList<>();
-        for (HashMap<String, String> personDetails : persons) {
-            String[] person = new String[3];
-            person[PERSON_DATA_INDEX_NAME] = personDetails.get(PERSON_PROPERTY_NAME);
-            person[PERSON_DATA_INDEX_PHONE] = personDetails.get(PERSON_PROPERTY_PHONE);
-            person[PERSON_DATA_INDEX_EMAIL] = personDetails.get(PERSON_PROPERTY_EMAIL);
-
+        for (HashMap<String, String> person : persons) {
             encoded.add(encodePersonToString(person));
         }
         return encoded;
