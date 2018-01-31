@@ -145,7 +145,9 @@ public class AddressBook {
 
     private static final String DIVIDER = "===================================================";
 
-    // These are the strings that define the different components of a person
+    /**
+     * These are the strings that define the different components of a person
+     */
     private static final String PERSON_DATA_NAME = "name";
     private static final String PERSON_DATA_EMAIL = "email";
     private static final String PERSON_DATA_PHONE = "phone";
