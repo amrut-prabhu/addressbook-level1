@@ -134,8 +134,7 @@ public class AddressBook {
     private static final String COMMAND_MODIFY_WORD = "modify";
     private static final String COMMAND_MODIFY_DESC = "Modifies the attributes of a person identified by the index "
                                                     + "number used in the last find/list call.";
-    private static final String COMMAND_MODIFY_PARAMETERS = "INDEX"
-                                                         + "NAME "
+    private static final String COMMAND_MODIFY_PARAMETERS = "INDEX" + "NAME "
                                                          + PERSON_DATA_PREFIX_PHONE + "PHONE_NUMBER "
                                                          + PERSON_DATA_PREFIX_EMAIL + "EMAIL";
     private static final String COMMAND_MODIFY_EXAMPLE = COMMAND_MODIFY_WORD + " 1" + " John Doe p/98765432 e/johnd@gmail.com";
@@ -608,7 +607,7 @@ public class AddressBook {
         final HashMap<String,String> personToModify = getPersonByLastVisibleIndex(targetVisibleIndex);
 
         // try decoding a person from the raw args
-        final Optional<HashMap<String, String>> decodeResult = decodePersonFromString(commandArgs);
+        final Optional<HashMap<String, String>> decodeResult = decodePersonFromString(modifyPersonArgs[1]);
         // checks if args are valid (decode result will not be present if the person is invalid)
         if (!decodeResult.isPresent()) {
             return getMessageForInvalidCommandInput(COMMAND_MODIFY_WORD, getUsageInfoForModifyCommand());
@@ -919,6 +918,7 @@ public class AddressBook {
      */
     private static void modifyPersonInAddressBook(HashMap<String,String> personToModify, HashMap<String,String> modifiedPersonDetails ) {
         int indexOfPersonToModify = ALL_PERSONS.indexOf(personToModify);
+        hasDeletedPersonFromAddressBook(personToModify);
         ALL_PERSONS.add(indexOfPersonToModify, modifiedPersonDetails);
 
         savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
