@@ -995,11 +995,13 @@ public class AddressBook {
 
         // phone is last arg, target is from prefix to end of string
         if (indexOfPhonePrefix > indexOfEmailPrefix) {
+            // Returns the phone number with the phone prefix removed
             return removePrefix(encoded.substring(indexOfPhonePrefix, encoded.length()).trim(),
                     PERSON_DATA_PREFIX_PHONE);
 
         // phone is middle arg, target is from own prefix to next prefix
         } else {
+            // Returns the phone number with the phone prefix removed
             return removePrefix(
                     encoded.substring(indexOfPhonePrefix, indexOfEmailPrefix).trim(),
                     PERSON_DATA_PREFIX_PHONE);
@@ -1018,11 +1020,13 @@ public class AddressBook {
 
         // email is last arg, target is from prefix to end of string
         if (indexOfEmailPrefix > indexOfPhonePrefix) {
+            // Returns the email address with the email prefix removed
             return removePrefix(encoded.substring(indexOfEmailPrefix, encoded.length()).trim(),
                     PERSON_DATA_PREFIX_EMAIL);
 
         // email is middle arg, target is from own prefix to next prefix
         } else {
+            // Returns the email address with the email prefix removed
             return removePrefix(
                     encoded.substring(indexOfEmailPrefix, indexOfPhonePrefix).trim(),
                     PERSON_DATA_PREFIX_EMAIL);
@@ -1150,7 +1154,7 @@ public class AddressBook {
      */
 
     /**
-     * Removes prefix from the given fullString if prefix occurs at the start of the string.
+     * Removes prefix from the given fullString.
      *
      * @param fullString  Parameter as a string
      * @param prefix  Parameter prefix to be removed
