@@ -130,6 +130,15 @@ public class AddressBook {
     private static final String COMMAND_HELP_DESC = "Shows program usage instructions.";
     private static final String COMMAND_HELP_EXAMPLE = COMMAND_HELP_WORD;
 
+    private static final String COMMAND_MODIFY_WORD = "modify";
+    private static final String COMMAND_MODIFY_DESC = "Modifies the attributes of a person identified by the index "
+                                                    + "number used in the last find/list call.";
+    private static final String COMMAND_MODIFY_PARAMETER = "INDEX"
+                                                         + "NAME "
+                                                         + PERSON_DATA_PREFIX_PHONE + "PHONE_NUMBER "
+                                                         + PERSON_DATA_PREFIX_EMAIL + "EMAIL";
+    private static final String COMMAND_MODIFY_EXAMPLE = COMMAND_MODIFY_WORD + " 1" + " John Doe p/98765432 e/johnd@gmail.com";
+
     private static final String COMMAND_EXIT_WORD = "exit";
     private static final String COMMAND_EXIT_DESC = "Exits the program.";
     private static final String COMMAND_EXIT_EXAMPLE = COMMAND_EXIT_WORD;
@@ -137,9 +146,9 @@ public class AddressBook {
     private static final String DIVIDER = "===================================================";
 
     // These are the strings that define the different components of a person
-    private static final String PERSON_PROPERTY_NAME = "name";
-    private static final String PERSON_PROPERTY_EMAIL = "email";
-    private static final String PERSON_PROPERTY_PHONE = "phone";
+    private static final String PERSON_DATA_NAME = "name";
+    private static final String PERSON_DATA_EMAIL = "email";
+    private static final String PERSON_DATA_PHONE = "phone";
 
     /**
      * The number of data elements for a single person.
@@ -836,7 +845,7 @@ public class AddressBook {
      * @param person whose name you want
      */
     private static String getNameFromPerson(HashMap<String,String> person) {
-        return person.get(PERSON_PROPERTY_NAME);
+        return person.get(PERSON_DATA_NAME);
     }
 
     /**
@@ -845,7 +854,7 @@ public class AddressBook {
      * @param person whose phone number you want
      */
     private static String getPhoneFromPerson(HashMap<String,String> person) {
-        return person.get(PERSON_PROPERTY_PHONE);
+        return person.get(PERSON_DATA_PHONE);
     }
 
     /**
@@ -854,7 +863,7 @@ public class AddressBook {
      * @param person whose email you want
      */
     private static String getEmailFromPerson(HashMap<String,String> person) {
-        return person.get(PERSON_PROPERTY_EMAIL);
+        return person.get(PERSON_DATA_EMAIL);
     }
 
     /**
@@ -867,9 +876,9 @@ public class AddressBook {
      */
     private static HashMap<String, String> makePersonFromData(String name, String phone, String email) {
         final HashMap<String, String> person= new HashMap<>();
-        person.put(PERSON_PROPERTY_NAME, name);
-        person.put(PERSON_PROPERTY_PHONE, phone);
-        person.put(PERSON_PROPERTY_EMAIL, email);
+        person.put(PERSON_DATA_NAME, name);
+        person.put(PERSON_DATA_PHONE, phone);
+        person.put(PERSON_DATA_EMAIL, email);
         return person;
     }
 
@@ -1026,9 +1035,9 @@ public class AddressBook {
      * @param person String array representing the person (used in internal data)
      */
     private static boolean isPersonDataValid(HashMap<String, String> person) {
-        return isPersonNameValid(person.get(PERSON_PROPERTY_NAME))
-                && isPersonPhoneValid(person.get(PERSON_PROPERTY_PHONE))
-                && isPersonEmailValid(person.get(PERSON_PROPERTY_EMAIL));
+        return isPersonNameValid(person.get(PERSON_DATA_NAME))
+                && isPersonPhoneValid(person.get(PERSON_DATA_PHONE))
+                && isPersonEmailValid(person.get(PERSON_DATA_EMAIL));
     }
 
     /*
