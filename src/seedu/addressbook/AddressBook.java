@@ -594,8 +594,14 @@ public class AddressBook {
      * @return feedback display message for the operation result
      */
     private static String executeModifyPerson(String commandArgs){
-        String[] modifyPersonArgs = getModifyPersonArgs(commandArgs);
+        // try decoding a person from the raw command args
+        Optional<HashMap<String, String>> decodeResult = decodePersonFromString(commandArgs);
+        // checks if args are valid (decode result will not be present if the person is invalid)
+        if (!decodeResult.isPresent()) {
+            return getMessageForInvalidCommandInput(COMMAND_MODIFY_WORD, getUsageInfoForModifyCommand());
+        }
 
+        String[] modifyPersonArgs = getModifyPersonArgs(commandArgs);
         if (!isModifyPersonIndexValid(modifyPersonArgs[0])) {
             return getMessageForInvalidCommandInput(COMMAND_MODIFY_WORD, getUsageInfoForModifyCommand());
         }
@@ -606,8 +612,7 @@ public class AddressBook {
 
         final HashMap<String,String> personToModify = getPersonByLastVisibleIndex(targetVisibleIndex);
 
-        // try decoding a person from the raw args
-        final Optional<HashMap<String, String>> decodeResult = decodePersonFromString(modifyPersonArgs[1]);
+        decodeResult = decodePersonFromString(modifyPersonArgs[1]);
         // checks if args are valid (decode result will not be present if the person is invalid)
         if (!decodeResult.isPresent()) {
             return getMessageForInvalidCommandInput(COMMAND_MODIFY_WORD, getUsageInfoForModifyCommand());
@@ -920,7 +925,6 @@ public class AddressBook {
         int indexOfPersonToModify = ALL_PERSONS.indexOf(personToModify);
         hasDeletedPersonFromAddressBook(personToModify);
         ALL_PERSONS.add(indexOfPersonToModify, modifiedPersonDetails);
-
         savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
     }
 
@@ -1199,6 +1203,7 @@ public class AddressBook {
                 + getUsageInfoForViewCommand() + LS
                 + getUsageInfoForDeleteCommand() + LS
                 + getUsageInfoForClearCommand() + LS
+                + getUsageInfoForModifyCommand() + LS
                 + getUsageInfoForExitCommand() + LS
                 + getUsageInfoForHelpCommand();
     }
