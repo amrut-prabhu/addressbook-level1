@@ -67,6 +67,7 @@ public class AddressBook {
      * =========================================================================
      */
     private static final String MESSAGE_ADDED = "New person added: %1$s, Phone: %2$s, Email: %3$s";
+    private static final String MESSAGE_MODIFIED = "Person modified: %1$s, Phone: %2$s, Email: %3$s";
     private static final String MESSAGE_ADDRESSBOOK_CLEARED = "Address book has been cleared!";
     private static final String MESSAGE_COMMAND_HELP = "%1$s: %2$s";
     private static final String MESSAGE_COMMAND_HELP_PARAMETERS = "\tParameters: %1$s";
@@ -133,7 +134,7 @@ public class AddressBook {
     private static final String COMMAND_MODIFY_WORD = "modify";
     private static final String COMMAND_MODIFY_DESC = "Modifies the attributes of a person identified by the index "
                                                     + "number used in the last find/list call.";
-    private static final String COMMAND_MODIFY_PARAMETER = "INDEX"
+    private static final String COMMAND_MODIFY_PARAMETERS = "INDEX"
                                                          + "NAME "
                                                          + PERSON_DATA_PREFIX_PHONE + "PHONE_NUMBER "
                                                          + PERSON_DATA_PREFIX_EMAIL + "EMAIL";
@@ -386,6 +387,8 @@ public class AddressBook {
             return getUsageInfoForAllCommands();
         case COMMAND_EXIT_WORD:
             executeExitProgramRequest();
+        case COMMAND_MODIFY_WORD:
+            return executeModifyPerson(commandArgs);
         default:
             return getMessageForInvalidCommandInput(commandType, getUsageInfoForAllCommands());
         }
@@ -583,6 +586,90 @@ public class AddressBook {
         showToUser(toBeDisplayed);
         return getMessageForPersonsDisplayedSummary(toBeDisplayed);
     }
+
+
+    /**
+     * Modifies the chosen entry in the address book.
+     *
+     * @param commandArgs full command args string from the user
+     * @return feedback display message for the operation result
+     */
+    private static String executeModifyPerson(String commandArgs){
+        String[] modifyPersonArgs = getModifyPersonArgs(commandArgs);
+
+        if (!isModifyPersonIndexValid(modifyPersonArgs[0])) {
+            return getMessageForInvalidCommandInput(COMMAND_MODIFY_WORD, getUsageInfoForModifyCommand());
+        }
+        final int targetVisibleIndex = extractTargetIndexFromModifyPersonArgs(modifyPersonArgs[0]);
+        if (!isDisplayIndexValidForLastPersonListingView(targetVisibleIndex)) {
+            return MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
+        }
+
+        final HashMap<String,String> personToModify = getPersonByLastVisibleIndex(targetVisibleIndex);
+
+        // try decoding a person from the raw args
+        final Optional<HashMap<String, String>> decodeResult = decodePersonFromString(commandArgs);
+        // checks if args are valid (decode result will not be present if the person is invalid)
+        if (!decodeResult.isPresent()) {
+            return getMessageForInvalidCommandInput(COMMAND_MODIFY_WORD, getUsageInfoForModifyCommand());
+        }
+        final HashMap<String, String> modifiedPersonDetails = decodeResult.get();
+
+       /*
+       return hasModifiedPersonFromAddressBook(personToModify, modifiedPersonDetails) ? getMessageForSuccessfulModify(targetInModel) // success
+               : MESSAGE_PERSON_NOT_IN_ADDRESSBOOK; // not found
+        */
+        modifyPersonInAddressBook(personToModify, modifiedPersonDetails);
+        return getMessageForSuccessfulModifyPerson(modifiedPersonDetails);
+    }
+
+    /**
+     * Extracts the arguments needed for the modify method.
+     *
+     * @param rawArgs raw command args string for the modify person command
+     * @return the list of input args needed for the modify person command
+     */
+    private static String[] getModifyPersonArgs(String rawArgs){
+        return rawArgs.split(" ", 2);
+    }
+
+    /**
+     * Checks validity of modify person index argument string's format.
+     *
+     * @param indexString index number of the person to modify
+     * @return whether the input args string is valid
+     */
+    private static boolean isModifyPersonIndexValid(String indexString) {
+        try {
+            final int extractedIndex = Integer.parseInt(indexString.trim()); // use standard libraries to parse
+            return extractedIndex >= DISPLAYED_INDEX_OFFSET;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
+
+    /**
+     * Extracts the target's index from the raw modify person args string
+     *
+     * @param rawArgs raw command args string for the modify person command
+     * @return extracted index
+     */
+    private static int extractTargetIndexFromModifyPersonArgs(String rawArgs) {
+        return Integer.parseInt(rawArgs.trim());
+    }
+
+    /**
+     * Constructs a feedback message for a successful add person command execution.
+     *
+     * @see #executeAddPerson(String)
+     * @param modifiedPersonDetails person to whom it was successfully modified
+     * @return successful modify person feedback message
+     */
+    private static String getMessageForSuccessfulModifyPerson(HashMap<String,String> modifiedPersonDetails) {
+        return String.format(MESSAGE_MODIFIED,
+                getNameFromPerson(modifiedPersonDetails), getPhoneFromPerson(modifiedPersonDetails), getEmailFromPerson(modifiedPersonDetails));
+    }
+
 
     /**
      * Requests to terminate the program.
@@ -819,6 +906,21 @@ public class AddressBook {
      */
     private static void clearAddressBook() {
         ALL_PERSONS.clear();
+        savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
+    }
+
+    /**
+     * Modifies the specified person in the addressbook. Saves any changes to storage file.
+     * Precondition: The specified person exists in addressbook
+     *
+     * @param personToModify the actual person inside the address book (personToModify == the person to modify in the full list)
+     * @param modifiedPersonDetails the details to which personToModify is to be changed
+     * @return true if the given person was found and deleted in the model
+     */
+    private static void modifyPersonInAddressBook(HashMap<String,String> personToModify, HashMap<String,String> modifiedPersonDetails ) {
+        int indexOfPersonToModify = ALL_PERSONS.indexOf(personToModify);
+        ALL_PERSONS.add(indexOfPersonToModify, modifiedPersonDetails);
+
         savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
     }
 
@@ -1138,6 +1240,13 @@ public class AddressBook {
     private static String getUsageInfoForHelpCommand() {
         return String.format(MESSAGE_COMMAND_HELP, COMMAND_HELP_WORD, COMMAND_HELP_DESC)
                 + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_HELP_EXAMPLE);
+    }
+
+    /** Returns the string for showing 'modify' command usage instruction */
+    private static String getUsageInfoForModifyCommand() {
+        return String.format(MESSAGE_COMMAND_HELP, COMMAND_MODIFY_WORD, COMMAND_MODIFY_DESC) + LS
+                + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_MODIFY_PARAMETERS) + LS
+                + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_MODIFY_EXAMPLE) + LS;
     }
 
     /** Returns the string for showing 'exit' command usage instruction */
