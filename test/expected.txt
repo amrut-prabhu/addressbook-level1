@@ -69,6 +69,10 @@
 || clear: Clears address book permanently.
 || 	Example: clear
 || 
+|| modify: Modifies the attributes of a person identified by the index number used in the last find/list call.
+|| 	Parameters: INDEXNAME p/PHONE_NUMBER e/EMAIL
+|| 	Example: modify 1 John Doe p/98765432 e/johnd@gmail.com
+|| 
 || exit: Exits the program.	Example: exit
 || help: Shows program usage instructions.	Example: help
 || ===================================================
@@ -265,6 +269,15 @@
 || Enter command: || [Command entered:  list]
 || 	1. Betsy Choo  Phone Number: 222222  Email: benchoo@nus.edu.sg
 || 	2. Dickson Ee  Phone Number: 444444  Email: dickson@nus.edu.sg
+|| 
+|| 2 persons found!
+|| ===================================================
+|| Enter command: || [Command entered:  modify 2 Amrut p/12345 e/amr@gmail.com]
+|| Person modified: Amrut, Phone: 12345, Email: amr@gmail.com
+|| ===================================================
+|| Enter command: || [Command entered:  list]
+|| 	1. Betsy Choo  Phone Number: 222222  Email: benchoo@nus.edu.sg
+|| 	2. Amrut  Phone Number: 12345  Email: amr@gmail.com
 || 
 || 2 persons found!
 || ===================================================

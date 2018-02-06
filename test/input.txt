@@ -90,11 +90,13 @@
   # listing indexes get updated on next request
   delete 1
   list
-
+	
+  modify 2 Amrut p/12345 e/amr@gmail.com
 ##########################################################
 # test clear command
 ##########################################################
-
+  list
+  
   # clears all
   clear
   list
