@@ -109,6 +109,23 @@ Examples:
   `delete 1`
   > Deletes the 1st person in the results of the `find` command.
 
+#### Modifying a person: `modify`
+> Modifies the person at the specified 'INDEX' in the address book
+
+Format: `modify INDEX NAME p/PHONE_NUMBER e/EMAIL`  
+> Words in `UPPER_CASE` are the parameters<br>
+  Phone number and email can be in any order but the name must come first.
+  The index refers to the index numbers shown in the most recent listing.
+
+Examples: 
+* `list`<br>
+  `modify 2 John Doe p/98765432 e/johnd@gmail.com`
+  > Modifies the details of the 2nd person in the address book.
+
+* `find Betsy` <br>
+  `modify 1 Betsy Crowe e/bencrowe@gmail.com p/1234567 `
+  > Modifies the details of the 1st person in the results of the `find` command.
+
 #### Clearing all entries: `clear`
 > Clears all entries from the address book.  
 Format: `clear`  
